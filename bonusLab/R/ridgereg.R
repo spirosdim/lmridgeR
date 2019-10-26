@@ -8,7 +8,9 @@ ridgereg <- setRefClass("ridgereg",
                                      y="matrix",
                                      b_ridge="matrix",
                                      y_hat="matrix",
-                                     e_hat="matrix"),
+                                     e_hat="matrix",
+                                     m="vector",
+                                     s="vector"),
                         
                         methods = list(
                           
@@ -20,6 +22,11 @@ ridgereg <- setRefClass("ridgereg",
                             dname <<- deparse(substitute(data))
                             X <<- model.matrix(formula,data)
                             y <<- as.matrix(data[all.vars(formula,data)[1]])
+                            
+                            # we save the mean and sd of each feature
+                            # to normalize any newdata afterwords
+                            m <<- apply(X[,-1], 2, mean)
+                            s <<- apply(X[,-1], 2, sd)
                             
                             #Normalize covariates
                             X <<- apply(X, 2, function(x)(x-mean(x))/sd(x))
@@ -51,6 +58,25 @@ ridgereg <- setRefClass("ridgereg",
                             
                           },
                           
+                          predict = function(newdata=NA){ #argument: the newdata without the bias column
+                            'Return the predicted values'
+                            
+                            if(all(is.na(newdata))==TRUE){
+                              return(as.vector(y_hat))
+                            }
+                            # give data to predict the y
+                            else {
+                              #we have to normalize the new data such as the training data
+                              newdata <- apply(newdata, 2,function(x)(x - m)/s)
+                              
+                              d1 <- matrix(rep(1,nrow(newdata)))
+                              colnames <-"(Intercept)"
+                              newdata <- cbind(d1,newdata)
+                              #we return the y values not in the original scale
+                              cat(newdata)
+                              return(as.vector(newdata %*% b_ridge))
+                            }
+                          },
                           
                           coef = function(){
                             'Return the coefficient'
