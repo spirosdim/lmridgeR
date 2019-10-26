@@ -1,3 +1,19 @@
+#' A reference class to perform ridge regression.
+#' 
+#' @import methods
+#' @field formula formula: Object dependent and indepedent variables.
+#' @field data data.frame: All the data. 
+#' @field dname vector: The names of the variables.
+#' @field lambda: parameter lambda
+#' @field X matrix: Independent variables.
+#' @field y matrix: Dependent variable.
+#' @field b_ridge matrix: Estimation of the regression coefficients.
+#' @field y_hat matrix: Estimation of the y values.
+#' @field e_hat matrix: Estimation of the error variable i.e. the residuals.
+#' @field m vector: mean of each covariate.
+#' @field s vector: sd of each covariate.
+#' @export ridgereg
+#' @exportClass ridgereg
 ridgereg <- setRefClass("ridgereg", 
                         
                         fields =list(formula="formula", 

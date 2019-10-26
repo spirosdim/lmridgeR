@@ -1,9 +1,14 @@
 Package: bonusLab
 Type: Package
-Title: What the package does (short line)
+Title: Ridge Regression
 Version: 1.0
 Date: 2019-10-25
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Author: Dimitriadis Spyridon, Mengxin Liu
+Maintainer: <spydi472@student.liu.se>
+Description: Implementation  of Ridge Regression and example usage.
+License: MIT License+ file LICENSE
+Encoding: UTF-8
+RoxygenNote: 6.1.1
+Suggests: testthat, knitr, MASS, nycflights13, dplyr
+Imports: ggplot2, methods, rmarkdown
+VignetteBuilder: knitr
