@@ -83,11 +83,17 @@ ridgereg <- setRefClass("ridgereg",
                             # give data to predict the y
                             else {
                               #we have to normalize the new data such as the training data
-                              newdata <- apply(newdata, 2,function(x)(x - m)/s)
+                              #newdata <- apply(data.matrix(newdata), 2,function(x)(x - m)/s)
+                              
+                              dm <- m
+                              for(i in 1:(nrow(newdata)-1)) dm <- rbind(dm,m)
+                              ds <- s
+                              for(i in 1:(nrow(newdata)-1)) ds <- rbind(ds,s)
+                              newdata <- (data.matrix(newdata)- dm)/ds
                               
                               d1 <- matrix(rep(1,nrow(newdata)))
                               colnames <-"(Intercept)"
-                              newdata <- as.matrix(cbind(d1,newdata))
+                              newdata <- data.matrix(cbind(d1,newdata))
                               #we return the y values not in the original scale
                               return(as.vector(newdata %*% b_ridge))
                             }
