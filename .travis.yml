@@ -1,6 +1,6 @@
 language: r
 cache: packages
 install:
-  - Rscript -e 'install.packages(c("devtools","roxygen2","testthat","ggplot2","knitr"));devtools::install_deps("bonusLab")'
+  - Rscript -e 'install.packages(c("devtools","roxygen2","testthat","ggplot2","knitr","dplyr","nycflights13","caret"));devtools::install_deps("bonusLab")'
 script:
   - Rscript -e 'devtools::check("bonusLab")'
