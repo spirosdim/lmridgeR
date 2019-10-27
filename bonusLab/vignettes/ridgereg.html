@@ -19,7 +19,6 @@
 
 
 
-<<<<<<< HEAD
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
 a.sourceLine { display: inline-block; line-height: 1.25; }
@@ -106,8 +105,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   }
 })();
 </script>
-=======
->>>>>>> 19d05bc1d22b3b4a5eeb9aa37f2bbf3d90262f70
 
 
 
@@ -311,7 +308,6 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 
 
-<<<<<<< HEAD
 <div id="library-and-data" class="section level2">
 <h2>Library and Data</h2>
 <p>Import the Boston housing data and caret library</p>
@@ -321,14 +317,59 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </div>
 <div id="splitting-data" class="section level2">
 <h2>Splitting data</h2>
-<p>We split the data using createDataPartition in caret</p>
+<p>We split the data using createDataPartition function in caret</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">split_point &lt;-<span class="st"> </span>caret<span class="op">::</span><span class="kw">createDataPartition</span>(BostonHousing<span class="op">$</span>medv,<span class="dt">p =</span> <span class="fl">0.8</span>,<span class="dt">list =</span> F)</a>
 <a class="sourceLine" id="cb2-2" data-line-number="2">training_data &lt;-<span class="st"> </span>BostonHousing[split_point,]</a>
 <a class="sourceLine" id="cb2-3" data-line-number="3">testing_data &lt;-<span class="st"> </span>BostonHousing[<span class="op">-</span>split_point,]</a></code></pre></div>
 </div>
-=======
-
->>>>>>> 19d05bc1d22b3b4a5eeb9aa37f2bbf3d90262f70
+<div id="linear-regression-using-lm-function" class="section level2">
+<h2>Linear regression using lm() function</h2>
+<p>To train the linear regression model, we choose to implement train function in caret package</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">lm_fit &lt;-<span class="st"> </span><span class="kw">train</span>(<span class="dt">x=</span> training_data[,<span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">13</span>)],<span class="dt">y=</span>training_data[,<span class="dv">14</span>], <span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw">summary</span>(lm_fit)</a></code></pre></div>
+<p>If we want to implement forward selection, we can change the method to leapFoward</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">lm_fit_forward &lt;-<span class="st"> </span><span class="kw">train</span>(medv<span class="op">~</span>crim<span class="op">+</span>zn<span class="op">+</span>indus<span class="op">+</span>chas<span class="op">+</span>nox<span class="op">+</span>age<span class="op">+</span></a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="st">                        </span>dis<span class="op">+</span>rad<span class="op">+</span>tax<span class="op">+</span>ptratio<span class="op">+</span>lstat, <span class="dt">data =</span> training_data, <span class="dt">method =</span> <span class="st">&quot;leapForward&quot;</span>)</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="kw">print</span>(lm_fit_forward)</a></code></pre></div>
+<div id="result-analysis" class="section level3">
+<h3>Result analysis</h3>
+<p>In the result we find that the MAE of lm is 3.508. If we implement the forward selection, the MAE is 3.91. Therefore we can conclude that the model performs better if we implement lm method.</p>
+</div>
+</div>
+<div id="linear-regression-using-ridge-regression" class="section level2">
+<h2>Linear regression using ridge regression</h2>
+<p>First we build the model components</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">Ridge_reg &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">type =</span> <span class="st">&quot;Regression&quot;</span>,</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">              <span class="dt">library =</span> <span class="st">&quot;bonusLab&quot;</span>,</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">              <span class="dt">loop =</span> <span class="ot">NULL</span>,<span class="dt">prob=</span><span class="ot">NULL</span>)</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">Ridge_reg<span class="op">$</span>parameters &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">parameter=</span><span class="st">'lambda'</span>,<span class="dt">class=</span><span class="st">'numeric'</span>,<span class="dt">label=</span><span class="st">'lambda'</span>)</a>
+<a class="sourceLine" id="cb5-5" data-line-number="5">Ridge_reg<span class="op">$</span>grid &lt;-<span class="st"> </span><span class="cf">function</span>(x, y, <span class="dt">len =</span> <span class="ot">NULL</span>, <span class="dt">search =</span> <span class="st">&quot;grid&quot;</span>){</a>
+<a class="sourceLine" id="cb5-6" data-line-number="6">  <span class="kw">data.frame</span>(<span class="dt">lambda=</span><span class="kw">c</span>(<span class="fl">0.1</span>,<span class="fl">0.6</span>,<span class="fl">0.8</span>,<span class="dv">1</span>,<span class="fl">1.5</span>,<span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb5-7" data-line-number="7">}</a>
+<a class="sourceLine" id="cb5-8" data-line-number="8">Ridge_reg<span class="op">$</span>fit &lt;-<span class="st"> </span><span class="cf">function</span>(x, y, wts, param, lev, last, weights, classProbs, ...){</a>
+<a class="sourceLine" id="cb5-9" data-line-number="9">  dat &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(x)</a>
+<a class="sourceLine" id="cb5-10" data-line-number="10">  dat<span class="op">$</span>yp &lt;-<span class="st"> </span>y</a>
+<a class="sourceLine" id="cb5-11" data-line-number="11">  output &lt;-<span class="st"> </span>ridgereg<span class="op">$</span><span class="kw">new</span>(yp<span class="op">~</span>.,<span class="dt">data=</span>dat,<span class="dt">lambda =</span> param<span class="op">$</span>lambda)</a>
+<a class="sourceLine" id="cb5-12" data-line-number="12">  <span class="kw">return</span>(output)</a>
+<a class="sourceLine" id="cb5-13" data-line-number="13">}</a>
+<a class="sourceLine" id="cb5-14" data-line-number="14">Ridge_reg<span class="op">$</span>predict &lt;-<span class="st"> </span><span class="cf">function</span>(modelFit, newdata, <span class="dt">preProc =</span> <span class="ot">NULL</span>, <span class="dt">submodels =</span> <span class="ot">NULL</span>){</a>
+<a class="sourceLine" id="cb5-15" data-line-number="15">  modelFit<span class="op">$</span><span class="kw">predict</span>(newdata)</a>
+<a class="sourceLine" id="cb5-16" data-line-number="16">}</a></code></pre></div>
+<p>Then we implement ridgereg in test function</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">ridge_fit &lt;-<span class="st"> </span><span class="kw">train</span>(medv<span class="op">~</span>crim<span class="op">+</span>zn<span class="op">+</span>indus<span class="op">+</span>chas<span class="op">+</span>nox<span class="op">+</span>age<span class="op">+</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="st">                        </span>dis<span class="op">+</span>rad<span class="op">+</span>tax<span class="op">+</span>ptratio<span class="op">+</span>lstat, <span class="dt">data =</span> training_data, <span class="dt">method =</span> Ridge_reg)</a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="kw">print</span>(ridge_fit)</a></code></pre></div>
+<div id="apply-the-10-fold-cross-validation" class="section level3">
+<h3>Apply the 10 fold cross validation</h3>
+<p>To implement the 10 fold cross validation, we use the trainControl function in caret package. Because we choose to implement 10 fold cross validation, we set the number to 10 with 3 repeats. After setting the control we setup the train function.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">cross_control &lt;-<span class="st"> </span><span class="kw">trainControl</span>(<span class="dt">method =</span> <span class="st">&quot;repeatedcv&quot;</span>, <span class="dt">number=</span><span class="dv">10</span>, <span class="dt">repeats =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">ridge_fit_cross &lt;-<span class="st"> </span><span class="kw">train</span>(medv<span class="op">~</span>crim<span class="op">+</span>zn<span class="op">+</span>indus<span class="op">+</span>chas<span class="op">+</span>nox<span class="op">+</span>age<span class="op">+</span></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="st">                        </span>dis<span class="op">+</span>rad<span class="op">+</span>tax<span class="op">+</span>ptratio<span class="op">+</span>lstat, <span class="dt">data =</span> training_data,</a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">                        <span class="dt">method=</span>Ridge_reg,<span class="dt">trControl =</span> cross_control,<span class="dt">preProc =</span> <span class="kw">c</span>(<span class="st">&quot;scale&quot;</span>,<span class="st">&quot;center&quot;</span>))</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5"><span class="kw">print</span>(ridge_fit_cross)</a></code></pre></div>
+<p>From the result section, the 10 fold cross validation produces MAE between 3.633 to 3.65. and the original ridege_fit produces MAE of 1138 to 1218. Therefore we can conclude that the linear model(lm) is the best performed model.</p>
+</div>
+</div>
 
 
 
