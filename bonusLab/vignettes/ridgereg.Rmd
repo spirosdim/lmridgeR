@@ -85,4 +85,4 @@ ridge_fit_cross <- train(medv~crim+zn+indus+chas+nox+age+
 print(ridge_fit_cross)
 ```
 
-From the result section, the 10 fold cross validation produces MAE between 3.633 to 3.65. and the original ridege_fit produces MAE of 1138 to 1218. Therefore we can conclude that the linear model(lm) is the best performed model.
+From the result section, the 10 fold cross validation produces MAE between 3.633 to 3.65. and the original ridege_fit produces MAE of 3.66 to 3.69. Therefore we can conclude that the linear model(lm) is the best performed model.
