@@ -9,3 +9,25 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval=FALSE)
+```
+
+## Library and Data
+Import the Boston housing data and caret library
+```{r}
+library(mlbench)
+library(caret)
+data(BostonHousing)
+```
+
+## Splitting data
+We split the data using createDataPartition function in caret
+```{r}
+split_point <- caret::createDataPartition(BostonHousing$medv,p = 0.8,list = F)
+training_data <- BostonHousing[split_point,]
+testing_data <- BostonHousing[-split_point,]
+```
+
+## Linear regression using lm() function
+
