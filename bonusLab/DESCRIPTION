@@ -9,6 +9,6 @@ Description: Implementation  of Ridge Regression and example usage.
 License: MIT License+ file LICENSE
 Encoding: UTF-8
 RoxygenNote: 6.1.1
-Suggests: testthat, knitr, MASS, nycflights13, dplyr
-Imports: ggplot2, methods, rmarkdown
+Suggests: testthat, knitr, MASS, nycflights13
+Imports: ggplot2, methods, rmarkdown, dplyr
 VignetteBuilder: knitr
