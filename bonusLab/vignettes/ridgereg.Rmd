@@ -55,10 +55,9 @@ Ridge_reg <- list(type = "Regression",
               loop = NULL,prob=NULL)
 Ridge_reg$parameters <- data.frame(parameter='lambda',class='numeric',label='lambda')
 Ridge_reg$grid <- function(x, y, len = NULL, search = "grid"){
-  data.frame(lambda=c(0.05,0.1,0.2,0.4,0.6,0.8,1,1.5,2))
+  data.frame(lambda=c(0.1,0.6,0.8,1,1.5,2))
 }
 Ridge_reg$fit <- function(x, y, wts, param, lev, last, weights, classProbs, ...){
-  x<- as.matrix(x)
   dat <- as.data.frame(x)
   dat$yp <- y
   output <- ridgereg$new(yp~.,data=dat,lambda = param$lambda)
@@ -72,6 +71,7 @@ Then we implement ridgereg in test function
 ```{r}
 ridge_fit <- train(medv~crim+zn+indus+chas+nox+age+
                         dis+rad+tax+ptratio+lstat, data = training_data, method = Ridge_reg)
+print(ridge_fit)
 ```
 
 ### Apply the 10 fold cross validation
@@ -81,5 +81,8 @@ After setting the control we setup the train function.
 cross_control <- trainControl(method = "repeatedcv", number=10, repeats = 3)
 ridge_fit_cross <- train(medv~crim+zn+indus+chas+nox+age+
                         dis+rad+tax+ptratio+lstat, data = training_data,
-                        method=Ridge_reg,trControl = cross_control)
+                        method=Ridge_reg,trControl = cross_control,preProc = c("scale","center"))
+print(ridge_fit_cross)
 ```
+
+From the result section, the 10 fold cross validation produces MAE between 3.633 to 3.65. and the original ridege_fit produces MAE of 1138 to 1218. Therefore we can conclude that the linear model(lm) is the best performed model.
