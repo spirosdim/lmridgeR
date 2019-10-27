@@ -1,0 +1,11 @@
+---
+title: "ridgereg"
+author: "Group 19"
+date: "10/27/2019"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{knapsack}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
