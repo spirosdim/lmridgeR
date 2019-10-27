@@ -51,7 +51,7 @@ MAE is 3.91. Therefore we can conclude that the model performs better if we impl
 First we build the model components
 ```{r}
 Ridge_reg <- list(type = "Regression",
-              library = "bonuslab",
+              library = "bonusLab",
               loop = NULL)
 Ridge_reg$parameters <- data.frame(parameter='lambda',class='numeric',label='lambda')
 Ridge_reg$grid <- function(x, y, len = NULL, search = "grid"){
