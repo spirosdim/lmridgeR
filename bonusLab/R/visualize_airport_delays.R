@@ -3,8 +3,8 @@
 #' @description A function that Visualize Airport Delays from NY Airport
 #' @import dplyr
 #' @import ggplot2
-#' @import 
-#' @import 
+#' @import nycflights13
+#' @import maps
 #' 
 visualize_airport_delays <- function(){
   fl_delays <- select(nycflights13::flights, arr_delay, dest)
