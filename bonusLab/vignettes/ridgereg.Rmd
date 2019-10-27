@@ -52,7 +52,7 @@ First we build the model components
 ```{r}
 Ridge_reg <- list(type = "Regression",
               library = "bonusLab",
-              loop = NULL)
+              loop = NULL,prob=NULL)
 Ridge_reg$parameters <- data.frame(parameter='lambda',class='numeric',label='lambda')
 Ridge_reg$grid <- function(x, y, len = NULL, search = "grid"){
   data.frame(lambda=c(0.05,0.1,0.2,0.4,0.6,0.8,1,1.5,2))
@@ -61,7 +61,7 @@ Ridge_reg$fit <- function(x, y, wts, param, lev, last, weights, classProbs, ...)
   x<- as.matrix(x)
   dat <- as.data.frame(x)
   dat$yp <- y
-  output <- ridgereg$new(.yp~.,data=dat,lambda = param$lambda)
+  output <- ridgereg$new(yp~.,data=dat,lambda = param$lambda)
   return(output)
 }
 Ridge_reg$predict <- function(modelFit, newdata, preProc = NULL, submodels = NULL){
