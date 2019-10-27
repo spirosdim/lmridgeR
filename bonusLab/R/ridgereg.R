@@ -1,6 +1,7 @@
 #' A reference class to perform ridge regression.
 #' 
 #' @import methods
+#' @import mlbench caret leaps
 #' @field formula formula: Object dependent and indepedent variables.
 #' @field data data.frame: All the data. 
 #' @field dname vector: The names of the variables.

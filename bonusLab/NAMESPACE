@@ -2,4 +2,11 @@
 
 export(ridgereg)
 exportClasses(ridgereg)
+import(caret)
+import(dplyr)
+import(ggplot2)
+import(leaps)
+import(maps)
 import(methods)
+import(mlbench)
+import(nycflights13)
