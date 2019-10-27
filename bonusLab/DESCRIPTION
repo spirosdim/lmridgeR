@@ -10,6 +10,6 @@ License: MIT License+ file LICENSE
 Encoding: UTF-8
 RoxygenNote: 6.1.1
 Suggests: testthat, knitr, roxygen2
-Imports: ggplot2, methods, rmarkdown, dplyr, nycflights13, maps, MASS, leaps
+Imports: ggplot2, methods, rmarkdown, dplyr, nycflights13, maps, MASS, leaps, mlbench
 VignetteBuilder: knitr
 LazyData: true
