@@ -30,4 +30,56 @@ testing_data <- BostonHousing[-split_point,]
 ```
 
 ## Linear regression using lm() function
+To train the linear regression model, we choose to implement train function in caret package
+```{r}
+lm_fit <- train(x= training_data[,c(1:13)],y=training_data[,14], method = "lm")
+summary(lm_fit)
+```
 
+If we want to implement forward selection, we can change the method to leapFoward
+```{r}
+lm_fit_forward <- train(medv~crim+zn+indus+chas+nox+age+
+                        dis+rad+tax+ptratio+lstat, data = training_data, method = "leapForward")
+print(lm_fit_forward)
+```
+
+### Result analysis
+In the result we find that the MAE of lm is 3.508. If we implement the forward selection, the 
+MAE is 3.91. Therefore we can conclude that the model performs better if we implement lm method.
+
+## Linear regression using ridge regression
+First we build the model components
+```{r}
+Ridge_reg <- list(type = "Regression",
+              library = "bonuslab",
+              loop = NULL)
+Ridge_reg$parameters <- data.frame(parameter='lambda',class='numeric',label='lambda')
+Ridge_reg$grid <- function(x, y, len = NULL, search = "grid"){
+  data.frame(lambda=c(0.05,0.1,0.2,0.4,0.6,0.8,1,1.5,2))
+}
+Ridge_reg$fit <- function(x, y, wts, param, lev, last, weights, classProbs, ...){
+  x<- as.matrix(x)
+  dat <- as.data.frame(x)
+  dat$yp <- y
+  output <- ridgereg$new(.yp~.,data=dat,lambda = param$lambda)
+  return(output)
+}
+Ridge_reg$predict <- function(modelFit, newdata, preProc = NULL, submodels = NULL){
+  modelFit$predict(newdata)
+}
+```
+Then we implement ridgereg in test function 
+```{r}
+ridge_fit <- train(medv~crim+zn+indus+chas+nox+age+
+                        dis+rad+tax+ptratio+lstat, data = training_data, method = Ridge_reg)
+```
+
+### Apply the 10 fold cross validation
+To implement the 10 fold cross validation, we use the trainControl function in caret package. Because we choose to implement 10 fold cross validation, we set the number to 10 with 3 repeats.
+After setting the control we setup the train function.
+```{r}
+cross_control <- trainControl(method = "repeatedcv", number=10, repeats = 3)
+ridge_fit_cross <- train(medv~crim+zn+indus+chas+nox+age+
+                        dis+rad+tax+ptratio+lstat, data = training_data,
+                        method=Ridge_reg,trControl = cross_control)
+```
