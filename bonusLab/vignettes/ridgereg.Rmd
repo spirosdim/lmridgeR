@@ -18,10 +18,11 @@ Import the Boston housing data and caret library
 ```{r}
 library(mlbench)
 library(caret)
+library(bonusLab)
 data(BostonHousing)
 ```
 
-## Splitting data
+## 1.Divide the BostonHousing data into a test and training dataset using the caret package.
 We split the data using createDataPartition function in caret
 ```{r}
 split_point <- caret::createDataPartition(BostonHousing$medv,p = 0.8,list = F)
@@ -29,7 +30,8 @@ training_data <- BostonHousing[split_point,]
 testing_data <- BostonHousing[-split_point,]
 ```
 
-## Linear regression using lm() function
+## 2. Fit a linear regression model and a linear regression model with forward selection of covariates on the training dataset.
+
 To train the linear regression model, we choose to implement train function in caret package
 ```{r}
 lm_fit <- train(x= training_data[,c(1:13)],y=training_data[,14], method = "lm")
@@ -43,11 +45,16 @@ lm_fit_forward <- train(medv~crim+zn+indus+chas+nox+age+
 print(lm_fit_forward)
 ```
 
-### Result analysis
-In the result we find that the MAE of lm is 3.508. If we implement the forward selection, the 
-MAE is 3.91. Therefore we can conclude that the model performs better if we implement lm method.
+## 3. Evaluate the performance of this model on the training dataset.
+```{r}
+lm_fit$results
+lm_fit_forward$results
+```
 
-## Linear regression using ridge regression
+In the result we find that the RMSE of lm is 4.894, in the training data. If we implement the forward selection, the best is with nvmax=4 having RMSE = 5.523, in the training data. Therefore we conclude that the model performs better with simple linear regression.
+
+## 4. Fit a ridge regression model using your ridgereg() function to the training dataset for different values of lambda.
+
 First we build the model components
 ```{r}
 Ridge_reg <- list(type = "Regression",
@@ -55,7 +62,7 @@ Ridge_reg <- list(type = "Regression",
               loop = NULL,prob=NULL)
 Ridge_reg$parameters <- data.frame(parameter='lambda',class='numeric',label='lambda')
 Ridge_reg$grid <- function(x, y, len = NULL, search = "grid"){
-  data.frame(lambda=c(0.1,0.6,0.8,1,1.5,2))
+  data.frame(lambda=c(0,0.1,0.5,1,1.5,2,3,4,5))
 }
 Ridge_reg$fit <- function(x, y, wts, param, lev, last, weights, classProbs, ...){
   dat <- as.data.frame(x)
@@ -67,16 +74,27 @@ Ridge_reg$predict <- function(modelFit, newdata, preProc = NULL, submodels = NUL
   modelFit$predict(newdata)
 }
 ```
+
 Then we implement ridgereg in test function 
+
 ```{r}
 ridge_fit <- train(medv~crim+zn+indus+chas+nox+age+
                         dis+rad+tax+ptratio+lstat, data = training_data, method = Ridge_reg)
 print(ridge_fit)
 ```
 
-### Apply the 10 fold cross validation
+The optimun value for lambda is 2, this model has RMSE = 5.356, in the training data.
+We can visualize it with the simple below graph.
+```{r}
+plot(x=ridge_fit$results[,1],ridge_fit$results[,2],
+     type="o", ylab="RMSE", xlab="lambda", main="")
+```
+
+
+## 5. Find the best hyperparameter value for lambda using 10-fold cross-validation on the training set.
 To implement the 10 fold cross validation, we use the trainControl function in caret package. Because we choose to implement 10 fold cross validation, we set the number to 10 with 3 repeats.
 After setting the control we setup the train function.
+
 ```{r}
 cross_control <- trainControl(method = "repeatedcv", number=10, repeats = 3)
 ridge_fit_cross <- train(medv~crim+zn+indus+chas+nox+age+
@@ -85,4 +103,39 @@ ridge_fit_cross <- train(medv~crim+zn+indus+chas+nox+age+
 print(ridge_fit_cross)
 ```
 
-From the result section, the 10 fold cross validation produces MAE between 3.633 to 3.65. and the original ridege_fit produces MAE of 3.66 to 3.69. Therefore we can conclude that the linear model(lm) is the best performed model.
+From the result section, the 10 fold cross validation produces the lowest RMSE = 5.192 with lambda=2, in the training data.
+We can visualize it with the simple below graph.
+
+```{r}
+plot(x=ridge_fit_cross$results[,1],ridge_fit_cross$results[,2],
+     type="o", ylab="RMSE", xlab="lambda", main="")
+```
+
+The lowest RMSE in the training set had the linear regression model, RMSE = 4.894.
+
+
+## 6. Evaluate the performance of all three models on the test dataset and write some concluding comments.
+
+We evaluate the linear regression model, the ridge regression model with lambda=2 and the ridge regression model with 10-fold cross-validation and lambda=2.
+
+```{r}
+preds <- predict(lm_fit, testing_data[,1:13])
+postResample(pred = preds, obs = testing_data[,14])
+```
+
+```{r}
+preds <- predict(ridge_fit, testing_data[,1:13])
+postResample(pred = preds, obs = testing_data[,14])
+```
+
+```{r}
+preds <- predict(ridge_fit_cross, testing_data[,1:13])
+postResample(pred = preds, obs = testing_data[,14])
+```
+
+Τhe linear regression model performed better than the other 2 models in the test, with RMSE = 5.040.
+
+The ridge regression model with lambda=2 and the ridge regression model with 10-fold cross-validation and lambda=2 have the same RMSE = 5.309.
+
+
+
