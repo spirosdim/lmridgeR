@@ -87,9 +87,8 @@ ridgereg <- setRefClass("ridgereg",
                               
                               d1 <- matrix(rep(1,nrow(newdata)))
                               colnames <-"(Intercept)"
-                              newdata <- cbind(d1,newdata)
+                              newdata <- as.matrix(cbind(d1,newdata))
                               #we return the y values not in the original scale
-                              cat(newdata)
                               return(as.vector(newdata %*% b_ridge))
                             }
                           },
