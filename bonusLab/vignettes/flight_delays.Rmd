@@ -1,0 +1,166 @@
+---
+title: "flight_delays"
+author: "Group 19"
+date: "10/27/2019"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{knapsack}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval=FALSE)
+```
+
+## Library and Data
+Import the necessary library
+```{r}
+library(bonusLab)
+library(mlbench)
+library(caret)
+library(dplyr)
+library(nycflights13)
+```
+
+
+## remove variables
+#### From flights dataset:
+* years : every flight is from 2013
+* dep_time, dep_delay, arr_time, air_time: If we want to predict a flight arrival delay we will not have these information beforehand.i.e. if we use these features to train the model, we are "cheating".
+* hour, minute: because they are the same with the column sched_dep_time
+* flights: because they are random flight numbers
+* time_hour: It's combination of dep_time with month and day
+* dest: not that informative
+* carrier : not that informative (focus on weather information for that model)
+* origin: not that informative (focus on weather information for that model)
+* month, day: not that informative (focus on weather information for that model)
+
+#### From weather dataset:
+* wind_gust: 2/3 of the dataset rows was NA
+* tailnum: too many unique values that do not help in training
+* precip: too many zero values, not that informative
+* month, day: not that informative (focus on weather information for that model)
+
+Note: we will focus our predictive model in the information (independent variables) from weather dataset.
+
+Note: we removed all rows that had at least 1 NA, because we have a big dataset and we will not need all of it for the perpuse of that lab.
+
+```{r}
+f_df<-dplyr::tbl_df(nycflights13::flights)
+f_df<-dplyr::select(f_df, month, day, sched_dep_time, sched_arr_time, arr_delay, carrier, 
+                    tailnum, origin, dest, distance,time_hour)
+w_df<-dplyr::tbl_df(nycflights13::weather)
+w_df<-dplyr::select(w_df,origin,temp,dewp,humid,wind_dir,wind_speed,wind_gust,precip,
+                    pressure,visib,time_hour)
+```
+
+
+```{r}
+df<-f_df %>%
+  left_join(w_df,by=c("origin","time_hour")) %>%
+  filter(!is.na(arr_delay))
+
+df<-dplyr::select(df,  sched_dep_time, sched_arr_time, arr_delay,  distance, 
+                  temp, dewp, humid, wind_dir, wind_speed, pressure,visib)
+```
+
+```{r}
+# delete all NAs
+df<-df %>%
+  filter(!is.na(sched_dep_time), !is.na(sched_arr_time), !is.na(arr_delay), !is.na(temp),
+         !is.na(distance), !is.na(dewp), !is.na(humid), !is.na(wind_dir), !is.na(wind_speed), 
+         !is.na(pressure), !is.na(visib))
+```
+
+We will work with 100000 data.
+```{r}
+df<-df %>% head(100000)
+df<-as.data.frame(df)
+```
+
+## Split the dataset 
+into train, validation, and test set (with proportions 80%, 15% and 5% respectively). 
+
+```{r}
+trainIndex<-createDataPartition(df$arr_delay, p = .8, list = FALSE, times = 1)
+dfTrain <- df[ trainIndex,]
+dfTestVal  <- df[-trainIndex,]
+
+trainIndex<-createDataPartition(dfTestVal$arr_delay, p = .75, list = FALSE, times = 1)
+dfValid <- dfTestVal[ trainIndex,]
+dfTest <- dfTestVal[ -trainIndex,]
+```
+
+## Train the models
+
+```{r}
+# l <- c(0,0.5,1,2,5)
+#y_hat <- matrix(0,nrow=length(l),ncol=ncol(dfTestVal[,-3]))
+# for(i in 1:length(l)){
+#   y_hat[i,] <- ridgereg(arr_delay~.,dfTrain, lambda=l[i])$predict(dfTestVal[,-3])
+# }
+
+
+ridge_l0 <- ridgereg(arr_delay~.,dfTrain, lambda=0)
+ridge_l05 <- ridgereg(arr_delay~.,dfTrain, lambda=1)
+ridge_l1 <- ridgereg(arr_delay~.,dfTrain, lambda=5)
+ridge_l2 <- ridgereg(arr_delay~.,dfTrain, lambda=10)
+ridge_l5 <- ridgereg(arr_delay~.,dfTrain, lambda=15)
+```
+
+## Predict on validation set and choose the optimun value for lambda.
+
+```{r}
+e0 <- (dfValid[,3]-ridge_l0$predict(dfValid[,-3])) 
+e05 <- (dfValid[,3]-ridge_l05$predict(dfValid[,-3]))  
+e1 <- (dfValid[,3]-ridge_l1$predict(dfValid[,-3])) 
+e2 <- (dfValid[,3]-ridge_l2$predict(dfValid[,-3])) 
+e5 <- (dfValid[,3]-ridge_l5$predict(dfValid[,-3])) 
+```
+
+
+```{r}
+ers <- cbind(e0=e0,e05=e05,e1=e1,e2=e2,e5=e5)
+```
+
+```{r}
+# Function that returns Root Mean Squared Error
+rmse <- function(error){
+    sqrt(mean(error^2))
+}
+```
+
+
+```{r}
+rmses <- numeric()
+for(i in 1:5){
+  rmses <- c(rmses, rmse(ers[,i]))
+}
+
+rmses
+```
+
+
+In the validation set, we have the lowest RMSE with lambda=0, RMSE=35.17932.
+
+Note: using different values of lambda, the RMSE does not change dramatically.
+
+```{r}
+
+rmse(dfTrain[,3]-ridge_l5$predict()) 
+```
+
+In the training set, with lambda=15 we have RMSE=34.52558.
+
+## Predict on test set
+
+```{r}
+rmse(dfTest[,3]-ridge_l5$predict(dfTest[,-3])) 
+```
+
+In the test set, with lambda=15 we have RMSE=33.30644.
+
+
+
+**Note:** we observe that as we use more data for training, the RMSE decrease and the optimun value of lambda increase. 

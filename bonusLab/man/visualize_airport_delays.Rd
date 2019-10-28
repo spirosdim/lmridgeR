@@ -6,6 +6,9 @@
 \usage{
 visualize_airport_delays()
 }
+\value{
+gg
+}
 \description{
 A function that Visualize Airport Delays from NY Airport
 }
